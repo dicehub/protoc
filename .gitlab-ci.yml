@@ -1,0 +1,34 @@
+before_script:
+  - date
+  - echo "Current DIR "$PWD
+
+after_script:
+  - date
+
+stages:
+  - build_and_deploy
+
+.build_and_push: &build_and_push
+  script:
+    - cd $CI_BUILD_TAG
+    # Push to gitlab.dicehub.org registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
+                          -t dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG ./$CI_BUILD_TAG
+    - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
+    
+    # Push to public docker registry
+    - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+    - docker push dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG
+    - docker rmi $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
+
+build:
+  stage: build_and_deploy
+  environment: production
+  variables:
+    CI_BUILD_TAG: "3.10.3"
+  <<: *build_and_push
+  only:
+    - master
+  tags:
+    - dice-builder
