@@ -10,7 +10,6 @@ stages:
 
 .build_and_push: &build_and_push
   script:
-    - cd $CI_BUILD_TAG
     # Push to gitlab.dicehub.org registry
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
