@@ -20,7 +20,10 @@ RUN \
   # Get and install protoc
   && wget https://github.com/protocolbuffers/protobuf/releases/download/v${VERSION}/protoc-${VERSION}-linux-x86_64.zip \
   && unzip *.zip \
-  && rm *.zip
+  && rm *.zip \
+  \
+  && chmod 755 /bin/protoc \
+  && protoc --version
 
 WORKDIR ${WORKDIR}
 USER proto
