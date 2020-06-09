@@ -1,7 +1,7 @@
-FROM alpine:3.10.3
+FROM alpine:3.12.0
 LABEL maintainer="dicehub.com"
 
-ENV VERSION="3.10.1"
+ENV VERSION="3.12.3"
 ENV WORKDIR="/data"
 
 RUN \
@@ -20,7 +20,10 @@ RUN \
   # Get and install protoc
   && wget https://github.com/protocolbuffers/protobuf/releases/download/v${VERSION}/protoc-${VERSION}-linux-x86_64.zip \
   && unzip *.zip \
-  && rm *.zip
+  && rm *.zip \
+  \
+  && chmod 755 /bin/protoc \
+  && protoc --version
 
 WORKDIR ${WORKDIR}
 USER proto
