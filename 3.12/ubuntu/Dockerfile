@@ -1,4 +1,4 @@
-FROM alpine:3.12.0
+FROM ubuntu:20.04
 LABEL maintainer="dicehub.com"
 
 ENV PROTOC_VERSION="3.12.3"
@@ -6,18 +6,24 @@ ENV WORKDIR="/data"
 
 RUN \
   set -ex \
-  # create user
-  # && useradd -ms /bin/bash dh \
+  && apt-get update \
+  && apt-get -qy install \
+      unzip \
+      wget \
+  && apt -y upgrade \
+  \
+  # cleanup
+  && apt-get clean \
+  && cd /var/lib/apt/lists && rm -fr *Release* *Sources* *Packages* \
+  && truncate -s 0 /var/log/*log
+
+RUN \
+  set -ex \
   # add proto group and user
-  && addgroup -g 1000 proto \
-  && adduser -u 1000 -G proto -s /bin/sh -D proto \
+  && addgroup -gid 1000 proto \
+  && adduser -u 1000  -gid 1000 --shell /bin/sh --disabled-password proto \
   && mkdir ${WORKDIR} \
   && chown proto:proto ${WORKDIR} \
-  \
-  # Fix known issue for alpine (https://github.com/bazelbuild/rules_closure/issues/228#issuecomment-342658456)
-  && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-  && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.30-r0/glibc-2.30-r0.apk \
-  && apk add glibc-2.30-r0.apk \
   \
   # Get and install protoc
   && wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip \
