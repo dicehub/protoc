@@ -1,3 +1,15 @@
+default:
+  image: docker:19.03.12-git
+  services:
+    - docker:19.03.12-dind
+  before_script:
+    - date
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker ps
+  tags:
+    - dice-builder
+
+
 before_script:
   - date
   - echo "Current DIR "$PWD
