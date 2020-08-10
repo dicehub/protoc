@@ -9,11 +9,6 @@ default:
   tags:
     - dice-builder
 
-
-before_script:
-  - date
-  - echo "Current DIR "$PWD
-
 after_script:
   - date
 
