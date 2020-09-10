@@ -31,7 +31,7 @@ stages:
 build_alpine:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "3.12.4"
+    CI_BUILD_TAG: "3.13.0"
     OS: "alpine"
   <<: *build_and_push
   only:
@@ -42,7 +42,7 @@ build_alpine:
 build_ubuntu:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "3.12.4-ubuntu"
+    CI_BUILD_TAG: "3.13.0-ubuntu"
     OS: "ubuntu"
   <<: *build_and_push
   only:
