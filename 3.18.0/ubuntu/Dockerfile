@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 LABEL maintainer="dicehub.com"
 
-ENV PROTOC_VERSION="3.14.0"
+ENV PROTOC_VERSION="3.18.0"
 ENV WORKDIR="/data"
 
 RUN \
