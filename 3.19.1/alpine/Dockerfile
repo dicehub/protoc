@@ -1,7 +1,7 @@
 FROM alpine:3.12.0
 LABEL maintainer="dicehub.com"
 
-ENV PROTOC_VERSION="3.18.0"
+ENV PROTOC_VERSION="3.19.1"
 ENV WORKDIR="/data"
 
 RUN \
