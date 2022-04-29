@@ -1,0 +1,98 @@
+From 4f7e5abe0018f96234734c617dcab5286c7935f2 Mon Sep 17 00:00:00 2001
+From: Gunter Spranz <gunter@gspranz.de>
+Date: Tue, 16 Mar 2021 11:13:38 +0700
+Subject: [PATCH] Patched for ES6 import style support
+
+---
+ .../protobuf/compiler/js/js_generator.cc      | 33 +++++++++++++++++--
+ .../protobuf/compiler/js/js_generator.h       |  3 ++
+ 2 files changed, 34 insertions(+), 2 deletions(-)
+
+diff --git a/src/google/protobuf/compiler/js/js_generator.cc b/src/google/protobuf/compiler/js/js_generator.cc
+index 819622e9a..a1c3a2858 100644
+--- a/src/google/protobuf/compiler/js/js_generator.cc
++++ b/src/google/protobuf/compiler/js/js_generator.cc
+@@ -227,7 +227,8 @@ std::string MaybeCrossFileRef(const GeneratorOptions& options,
+                               const FileDescriptor* from_file,
+                               const Descriptor* to_message) {
+   if ((options.import_style == GeneratorOptions::kImportCommonJs ||
+-       options.import_style == GeneratorOptions::kImportCommonJsStrict) &&
++       options.import_style == GeneratorOptions::kImportCommonJsStrict || 
++      options.import_style == GeneratorOptions::kImportEs6) &&
+       from_file != to_message->file()) {
+     // Cross-file ref in CommonJS needs to use the module alias instead of
+     // the global name.
+@@ -1748,7 +1749,7 @@ void Generator::GenerateProvides(const GeneratorOptions& options,
+       //   foo.bar.Baz = function() { /* ... */ }
+ 
+       // Do not use global scope in strict mode
+-      if (options.import_style == GeneratorOptions::kImportCommonJsStrict) {
++      if (options.import_style == GeneratorOptions::kImportCommonJsStrict || options.import_style == GeneratorOptions::kImportEs6) {
+         std::string namespaceObject = *it;
+         // Remove "proto." from the namespace object
+         GOOGLE_CHECK_EQ(0, namespaceObject.compare(0, 6, "proto."));
+@@ -1763,6 +1764,19 @@ void Generator::GenerateProvides(const GeneratorOptions& options,
+   }
+ }
+ 
++void Generator::GenerateExports(const GeneratorOptions& options,
++								io::Printer* printer,
++								const FileDescriptor* file,
++								std::set<std::string>* provided) const {
++    printer->Print("export const {\n");
++    for (std::set<std::string>::iterator it = provided->begin();
++        it != provided->end(); ++it) {
++	    auto export_name = it->substr(it->rfind(".") + 1);
++        printer->Print("  $name$,\n", "name", export_name);
++    }
++    printer->Print("} = $name$;\n", "name", GetNamespace(options, file));
++}
++
+ void Generator::GenerateRequiresForSCC(const GeneratorOptions& options,
+                                        io::Printer* printer, const SCC* scc,
+                                        std::set<std::string>* provided) const {
+@@ -3652,6 +3666,18 @@ void Generator::GenerateFile(const GeneratorOptions& options,
+           "alias", ModuleAlias(name), "file",
+           GetRootPath(file->name(), name) + GetJSFilename(options, name));
+     }
++  } else if (options.import_style == GeneratorOptions::kImportEs6) {
++      printer->Print("import * as jspb from 'google-protobuf';\n");
++      printer->Print("var goog = jspb;\n");
++  	  printer->Print("var proto = {};\n\n");
++      for (int i = 0; i < file->dependency_count(); i++) {
++          const std::string& name = file->dependency(i)->name();
++          printer->Print(
++              "import * as $alias$ from '$file$';\n"
++              "goog.object.extend(proto, $alias$);\n",
++              "alias", ModuleAlias(name), "file",
++              GetRootPath(file->name(), name) + GetJSFilename(options, name));
++      }
+   }
+ 
+   std::set<std::string> provided;
+@@ -3694,6 +3720,9 @@ void Generator::GenerateFile(const GeneratorOptions& options,
+   } else if (options.import_style == GeneratorOptions::kImportCommonJsStrict) {
+     printer->Print("goog.object.extend(exports, proto);\n", "package",
+                    GetNamespace(options, file));
++  } else if (options.import_style == GeneratorOptions::kImportEs6)
++  {
++      GenerateExports(options, printer, file, &provided);
+   }
+ 
+   // Emit well-known type methods.
+diff --git a/src/google/protobuf/compiler/js/js_generator.h b/src/google/protobuf/compiler/js/js_generator.h
+index e452020a7..2d2863315 100644
+--- a/src/google/protobuf/compiler/js/js_generator.h
++++ b/src/google/protobuf/compiler/js/js_generator.h
+@@ -183,6 +183,9 @@ class PROTOC_EXPORT Generator : public CodeGenerator {
+   // Print the goog.provides() found by the methods above.
+   void GenerateProvides(const GeneratorOptions& options, io::Printer* printer,
+                         std::set<std::string>* provided) const;
++  void GenerateExports(const GeneratorOptions& options, 
++					   io::Printer* printer, const FileDescriptor* file,
++					   std::set<std::string>* provided) const;
+ 
+   // Generate goog.setTestOnly() if indicated.
+   void GenerateTestOnly(const GeneratorOptions& options,
+-- 
+GitLab
