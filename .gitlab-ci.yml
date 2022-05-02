@@ -53,8 +53,8 @@ build_ubuntu:
 build_ubuntu_es6:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "3.20.1-ubuntu-es6"
-    OS: "ubuntu"
+    CI_BUILD_TAG: "3.20.1-ubuntu"
+    OS: "ubuntu-es6"
   <<: *build_and_push
   only:
     - master
