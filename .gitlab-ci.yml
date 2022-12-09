@@ -20,7 +20,7 @@ stages:
     # Push to gitlab.dicehub.org registry
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
-                          -t dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG ./${CI_BUILD_TAG:0:5}/${OS}
+                          -t dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG ./${CI_BUILD_TAG:0:6}/${OS}
     - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
     
     # Push to public docker registry
@@ -31,7 +31,7 @@ stages:
 build_alpine:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "21.11"
+    CI_BUILD_TAG: "3.20.1"
     OS: "alpine"
   <<: *build_and_push
   only:
@@ -42,7 +42,7 @@ build_alpine:
 build_ubuntu:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "21.11-ubuntu"
+    CI_BUILD_TAG: "3.20.1-ubuntu"
     OS: "ubuntu"
   <<: *build_and_push
   only:
@@ -53,7 +53,7 @@ build_ubuntu:
 build_ubuntu_es6:
   stage: build_and_deploy
   variables:
-    CI_BUILD_TAG: "21.11-ubuntu-es6"
+    CI_BUILD_TAG: "3.20.1-ubuntu-es6"
     OS: "ubuntu-es6"
   <<: *build_and_push
   only:
