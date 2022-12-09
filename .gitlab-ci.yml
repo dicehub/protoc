@@ -20,7 +20,7 @@ stages:
     # Push to gitlab.dicehub.org registry
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
-                          -t dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG ./${CI_BUILD_TAG:0:7}/${OS}
+                          -t dicehub/$CI_PROJECT_NAME:$CI_BUILD_TAG ./${CI_BUILD_TAG:0:5}/${OS}
     - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_TAG
     
     # Push to public docker registry
