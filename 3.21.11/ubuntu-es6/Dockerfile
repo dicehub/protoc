@@ -5,7 +5,7 @@
 FROM ubuntu:20.04 as builder
 LABEL maintainer="dicehub.com"
 
-ENV PROTOC_VERSION="3.20.1"
+ENV PROTOC_VERSION="3.21.11"
 
 RUN \
   set -ex \
